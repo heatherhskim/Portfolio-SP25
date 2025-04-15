@@ -1,0 +1,110 @@
+/* Reset default styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Navbar Styling */
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: #ebebeb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 0;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 1000; 
+}
+
+
+/* Logo Styling */
+.logo img {
+    height: 50px; /* Adjust as needed */
+}
+
+/* Navigation Links */
+.nav-links {
+    list-style: none;
+    display: flex;
+    gap: 25px;
+}
+
+.nav-links li {
+    display: inline;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: #333;
+    font-size: 18px;
+    font-weight: bold;
+    padding: 10px 15px;
+    border-radius: 5px;
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
+/* Hover Effect */
+.nav-links a:hover {
+    background-color: #bac3ff; /* Slightly darker blue */
+    color: white;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .navbar {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .nav-links {
+        flex-direction: column;
+        text-align: center;
+        gap: 10px;
+    }
+
+    .nav-links a {
+        display: block;
+        width: 100%;
+    }
+
+    .body
+    {
+        background-color: aliceblue;
+    }
+
+    
+}
+
+.title {
+    margin-top: 100px;
+    margin-left: 200px;
+    margin-right: 100px;
+}
+
+.longhorn {
+    margin-left: 300px;
+    width: 50%;
+    height: 50%; 
+    
+}
+
+h1 {
+    margin-top: 70px;
+
+    color: #525a8f;
+    font-family: "Arial", sans-serif; 
+    font-weight: bold;
+    margin-bottom: 20px;
+    margin-left: 350px; 
+    font-size: 100px; /* Increased font size */
+}
+
+body{
+    background-color: #bac3ff;
+}
+
+

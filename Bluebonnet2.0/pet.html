@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saving Pet</title>
+    <link rel="stylesheet" href="pet.css"> <!-- Ensuring navbar styling matches -->
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="logo">
+            <img src="C:\Users\rober\Downloads\bluebonnetLogo.webp" alt="Logo">
+        </div>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="chart.html">Spending</a></li>
+          <!--<li><a href="goal.html">Set Goal</a></li>-->
+          <li><a href="pet.html">Your Pet</a></li>
+        </ul>
+    </nav>
+
+    <h1>Grow Bonny the Budget Saving Cow!</h1>
+    
+    <label for="savings">Adjust your savings: $</label>   
+    <input type="number" id="savings" name="savings" step="0.01" min="0" oninput="updateSavingsDisplay()"><br><br>
+    
+    <input id="submitButton" type="submit" value="Submit" onclick="growPet()">
+
+    <label for="total"> Total savings: $</label>
+    <span id="total-savings">0</span><br><br>
+
+    <div id="pet-container">
+        <img id="pet" src="C:\Users\rober\Downloads\Bonnie.webp" alt="Your Pet">
+    </div>
+
+    <div id="congrats-message" style="display:none; color: green; font-size: 20px;">
+        Congrats! You've saved $1000 and your pet has grown!
+    </div>
+
+    <script>
+        let totalSavings = 0;  // Keeps track of total savings
+
+        function updateSavingsDisplay() {
+            let savingsInput = parseFloat(document.getElementById('savings').value);
+            if (!isNaN(savingsInput) && savingsInput >= 0) {
+                document.getElementById('total-savings').textContent = (totalSavings + savingsInput).toFixed(2);
+            }
+        }
+
+        function growPet() {
+            let savings = parseFloat(document.getElementById('savings').value);
+            
+            if (!isNaN(savings) && savings > 0) {
+                totalSavings += savings;
+                
+                // Check if savings have reached or exceeded $1000
+                if (totalSavings >= 1000) {
+                    document.getElementById('pet').style.transform = 'scale(3)'; // Set maximum pet size
+                } else {
+                    document.getElementById('total-savings').textContent = totalSavings.toFixed(2);
+                    document.getElementById('pet').style.transform = 'scale(' + (1 + totalSavings / 500) + ')';
+                }
+            }
+            
+            document.getElementById('savings').value = ''; // Clear input after submission
+        }
+    </script>
+
+</body>
+</html>

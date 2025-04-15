@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budget Pie Chart</title>
+    <script id="pieChart" src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="chart.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="logo">
+            <img src="C:\Users\rober\Downloads\bluebonnetLogo.webp" alt="Logo">
+        </div>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="chart.html">Spending</a></li>
+          <!--<li><a href="goal.html">Set Goal</a></li>-->
+          <li><a href="pet.html">Your Pet</a></li>
+        </ul>
+    </nav>
+
+    <div id="content">
+        <h1>Monthly Budget</h1>
+        <label class="monthlyIncomLabel" for="income">Enter your monthly income:  </label>
+        <input type="number" id="income" value="0">
+        <button class="generateButton" onclick="updateChart()">Generate Chart</button>
+        <canvas id="budgetChart"></canvas>
+    </div>
+
+    <script>
+        let chart;
+
+        function updateChart() {
+            const income = parseFloat(document.getElementById('income').value);
+            const budgetAllocation = {
+                Rent: income * 0.35,
+                Groceries: income * 0.15,
+                Savings: income * 0.20,
+                Utilities: income * 0.10,
+                Entertainment: income * 0.10,
+                Other: income * 0.10
+            };
+            
+            const data = {
+                labels: Object.keys(budgetAllocation),
+                datasets: [{
+                    data: Object.values(budgetAllocation),
+                    backgroundColor: ['#525a8f', '#b6decb', '#deb6cc', '#dfc58a', '#8b4545', '#9979ab']
+                }]
+            };
+            
+            if (chart) {
+                chart.destroy();
+            }
+            
+            chart = new Chart(document.getElementById('budgetChart'), {
+                type: 'pie',
+                data: data
+            });
+        }
+
+        updateChart();
+    </script>
+</body>
+</html>
