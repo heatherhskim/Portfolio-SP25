@@ -24,9 +24,10 @@
 // Use functions
 // Store all information in file(s)
 
-#include <string.h>
 #include <stdio.h>
+#include <string.h>
 #include <stdbool.h>
+#include <stdlib.h>
 
 struct book
 {
@@ -41,138 +42,294 @@ struct book
     char authorShortBio[20];
 };
 
-// void add();
-// void update();
-// void delete();
-// void search();
+#define CMD_EXIT        0
+#define CMD_ADD         1
+#define CMD_UPDATE      2
+#define CMD_DELETE      3
+#define CMD_SEARCH      4
+#define CMD_DISPLAY     5
 
-void add(struct book bookInfo[], int bookCount);
+#define MAX_BOOK_COUNT  10
 
-bool search(struct book bookInfo[], int bookCount, int searchBookID);
-
-void display(struct book bookInfo[], int bookCount);
+int add(struct book arrBookInfo[], int bookCount);
+void update(struct book *pBookInfo, int newBookID);
+void delete(struct book arrBookInfo[], int bookCount, int deleteIndex);
+int search(struct book arrBookInfo[], int bookCount, int searchBookID);
+void display(struct book arrBookInfo[], int bookCount);
 void displaySingle(struct book bookInfo);
+void copyBookInfo(struct book* pBookInfo, struct book bookInfo);
+bool write(struct book arrBookInfo[], int bookCount);
 
 int main(void)
 {
     int i, j, n, d;
+    // 사용자가 입력한 명령
     int cmd;
+    // 저장된 책의 수. 0 ~ MAX_BOOK_COUNT
+    // 추가할 대 +1, 삭제할 때 -1
     int bookCount = 0;
-    struct book bookInfo[10];
+    struct book arrBookInfo[MAX_BOOK_COUNT];
     int searchBookID;
+    int updateBookID;
+    int deleteBookID;
+    int index = -1;
     
     while(true)
     {
-        printf("Enter the number: \t");
+        // 사용자에게 명령어 알림.
+        printf("Enter the number\n");
+        printf("ADD(1), UPDATE(2), DELETE(3), SEARCH(4), DISPLAY(5), EXIT(0)\n");
+        printf(">> ");
         scanf("%d", &cmd);
-        if(cmd == 0)
+        if(cmd == CMD_EXIT)
         {
             printf("Exit!\n");
             break;
         }
+
         switch(cmd)
         {
-            case 1: 
-                printf("Add book info\n");
-                add(bookInfo, bookCount);
-                bookCount++;
+            case CMD_ADD: 
+                printf("\n\nAdd book info\n");
+                int error = add(arrBookInfo, bookCount);
+                if (error == 1) {
+                    // 성공일 경우 count 를 1 증가.
+                    bookCount++;
+                    write(arrBookInfo, bookCount);
+                    printf("-> Success\n");
+                } else if (error == -1) {
+                    printf("-> Dupliate book id\n");
+                }else {
+                    printf("-> Not enough memory!\n");
+                }
                 break;
-            case 2: 
-                printf("Update book info: \n");
+            case CMD_UPDATE: 
+                printf("\n\nUpdate book info\n");
                 // 어떤 책을 업데이트 할건지 일단 서치하고,
                 // 서치했을 때 책 목록에 있으면 -> 그때 업데이트 가능 
                 // 없으면 -> 없다고 한 줄 써줘야됨
+                printf("Enter book ID to update: ");
+                scanf("%d", &updateBookID);
+                // search 함수를 이용해서 이미 존재하는 book id 인지 확인한다.
+                index = search(arrBookInfo, bookCount, updateBookID);
+                // 존재하는 않을 경우 음수를 리턴 함.
+                if (index < 0) {
+                    printf("-> Book ID not found\n");
+                } else {
+                    update(&arrBookInfo[index], updateBookID);
+                    write(arrBookInfo, bookCount);
+                    printf("-> Success\n");
+                }
                 break;
-            case 3: 
-                printf("Delete book info: \n");
+            case CMD_DELETE: 
+                printf("\n\nDelete book info: \n");
                 // 북인포 어레이 순서가 하나씩 앞으로 당겨짐
-                bookCount--;
+                printf("Enter book ID to delete: ");
+                scanf("%d",&deleteBookID);
+                index = search(arrBookInfo, bookCount, deleteBookID);
+                // 존재하는 않을 경우 음수를 리턴 함.
+                if (index < 0) {
+                    printf("-> Book ID not found\n");
+                } else {
+                    // index는 삭제 해야 할 책의 arrBoolInfo에서의 위치(index)
+                    delete(arrBookInfo, bookCount, index);
+                    // 삭제 후 책의 수 감소.
+                    bookCount--;
+                    write(arrBookInfo, bookCount);
+                    printf("-> Success\n");
+                }
                 break;
-            case 4: 
-                printf("Search book info: \n");
-                printf("Enter book ID to search: \n");
+            case CMD_SEARCH: 
+                printf("\n\nSearch book info\n");
+                printf("Enter book ID to search: ");
                 scanf("%d", &searchBookID);
-                bool boolResult = search(bookInfo, bookCount, searchBookID);
-                if(boolResult == false)
-                    printf("Book ID not found\n");
+                index = search(arrBookInfo, bookCount, searchBookID);
+                if(index < 0) {
+                    printf("-> Book ID not found\n");
+                } else {
+                    displaySingle(arrBookInfo[index]);
+                }
                 break; 
-            case 5: 
-                printf("Display a list of all books: \n");
-                display(bookInfo, bookCount);
-                
+            case CMD_DISPLAY: 
+                printf("\n\nDisplay a list of all books\n");
+                display(arrBookInfo, bookCount);
                 break;
             default:
                 printf("Invalid!\n");
                 break;
         }
+        printf("\n");
     }
     
     return 0;
 }
 
 
-void add(struct book bookInfo[], int bookCount)
+/**
+ * 저장할 공간이 부족하면 0 리턴
+ * bookID 가 이미 저장되어 있는 경우 -1 리턴
+ * 저장에 성공하면 1 리턴
+*/
+int add(struct book arrBookInfo[], int bookCount)
 {
     if(bookCount == 10)
     {
-        printf("No memories available\n");
-        return;
+        return 0;
     }
-    bookInfo[bookCount].bookID = bookCount+1;
-    printf("Enter book ID: \t");
-    scanf("%s", bookInfo[bookCount].bookID);
-    printf("Enter book name: \t");
-    scanf("%s", bookInfo[bookCount].bookName);
-    printf("Enter publication date: \t");
-    scanf("%s", bookInfo[bookCount].publicationDate);
-    printf("Enter publisher name: \t");
-    scanf("%s", bookInfo[bookCount].publisherName);
-    printf("Enter author name: \t");
-    scanf("%s", bookInfo[bookCount].authorName);
-    printf("Enter author address: \t");
-    scanf("%s", bookInfo[bookCount].authorAddress);
-    printf("Enter author phone number: \t");
-    scanf("%s", bookInfo[bookCount].authorPhoneNum);
-    printf("Enter author email address: \t");
-    scanf("%s", bookInfo[bookCount].authorEmailAddress);
-    printf("Enter author short biography: \t");
-    scanf("%s", bookInfo[bookCount].authorShortBio);
+    int newBookID;
+    printf("Enter new book ID: \t");
+    scanf("%d", &newBookID);
+    // 사용자가 입력한 id가 이미 저장되어 있는지 찾아본다.
+    int index = search(arrBookInfo, bookCount, newBookID);
+    // index 가 0 이상인 경우 이미 존재하는 book id
+    if (index >= 0) {
+        return -1;
+    }
+    // 저장 성공
+    update(&arrBookInfo[bookCount], newBookID);
+    return 1;
+}
 
-    // 배열은 & 안 써도 됨 (배열 자체가 주소이기 때문)
+void update(struct book *pBookInfo, int newBookId)
+{
+    pBookInfo->bookID = newBookId;
+    getchar();
+    printf("Enter book name: \t");
+    gets(pBookInfo->bookName);
+
+    printf("Enter publication date: \t");
+    gets(pBookInfo->publicationDate);
+
+    printf("Enter publisher name: \t");
+    gets(pBookInfo->publisherName);
+
+    printf("Enter author name: \t");
+    gets(pBookInfo->authorName);
+
+    printf("Enter author address: \t");
+    gets(pBookInfo->authorAddress);
+
+    printf("Enter author phone number: \t");
+    gets(pBookInfo->authorPhoneNum);
+
+    printf("Enter author email address: \t");
+    gets(pBookInfo->authorEmailAddress);
+
+    printf("Enter author short biography: \t");
+    gets(pBookInfo->authorShortBio);
+}
+
+/**
+ * arrBookInfo[deleteIndex] 를 삭제
+ * 뒤에 있는 bookInfo를 하나씩 앞으로 복사.
+*/
+void delete(struct book arrBookInfo[], int bookCount, int deleteIndex)
+{
+    if (bookCount == 1 && deleteIndex == 0)
+        return;
+        
+    // deleteIndex 위치의 데이터를 삭제
+    // deleteIndex + 1 위치 데이터를 deleteIndex 로 복사
+    // deleteIndex + 2 위치 데이터를 deleteIndex + 1 로 복사
+    for (int i = deleteIndex + 1; i < bookCount; i++) {
+        copyBookInfo(&arrBookInfo[i-1], arrBookInfo[i]);
+    }
 }
 
 
-bool search(struct book bookInfo[], int bookCount, int searchBookID)
+void copyBookInfo(struct book* pBookInfo, struct book bookInfo)
 {
-    if(bookCount==0)
-        printf("No book to search\n");
-    for(int i=0; i<bookCount; i++)
+    pBookInfo->bookID = bookInfo.bookID;
+    strcpy(pBookInfo->bookName, bookInfo.bookName);
+    strcpy(pBookInfo->publicationDate, bookInfo.publicationDate);
+    strcpy(pBookInfo->publisherName, bookInfo.publisherName);
+    strcpy(pBookInfo->authorName, bookInfo.authorName);
+    strcpy(pBookInfo->authorAddress, bookInfo.authorAddress);
+    strcpy(pBookInfo->authorPhoneNum, bookInfo.authorPhoneNum);
+    strcpy(pBookInfo->authorEmailAddress, bookInfo.authorEmailAddress);
+    strcpy(pBookInfo->authorShortBio, bookInfo.authorShortBio);
+}
+
+/**
+ * book id로 검색해서 찾았을 경우 해당 책이 저장된 index( 0 ~ 10 )를 리턴하고
+ * 그렇지 않으면 음수(-1)을 리턴한다.
+*/
+int search(struct book arrBookInfo[], int bookCount, int searchBookID)
+{
+    if(bookCount == 0)
+	{
+		return -1;
+	}
+    for(int i = 0; i < bookCount; i++)
     {
-        if(bookInfo[i].bookID == searchBookID)
+        if(arrBookInfo[i].bookID == searchBookID)
         {
-            displaySingle(bookInfo[i]);
-            return true;
+            return i;
         }
     }
-    return false;
+    return -1;
 }
 
+/**
+ * 책 한권의 정보를 화면에 출력.
+*/
 void displaySingle(struct book bookInfo)
 {
-    printf("%d. %s\n", bookInfo.bookID, bookInfo.bookName);
+    printf("#################################################################\n");
+    printf("\tbook id: %d\n", bookInfo.bookID);
+    printf("\tbook name: %s\n", bookInfo.bookName);
+    printf("\tpublication date: %s\n", bookInfo.publicationDate);
+    printf("\tpublisher name: %s\n", bookInfo.publisherName);
+    printf("\tauthor name: %s\n", bookInfo.authorName);
+    printf("\tauther address: %s\n", bookInfo.authorAddress);
+    printf("\tauthor phone number: %s\n", bookInfo.authorPhoneNum);
+    printf("\tauthor email address: %s\n", bookInfo.authorEmailAddress);
+    printf("\tauthor short Biography: %s\n", bookInfo.authorShortBio);
 }
 
 
-
-void display(struct book bookInfo[], int bookCount)
+/**
+ * 모든 책 정보를 출력
+ * for 문에서 책 한권의 정보 arrBookInfo[i] 를 displaySingle 함수에 전달해서 화면에 출력한다.
+*/
+void display(struct book arrBookInfo[], int bookCount)
 {
     if(bookCount == 0)
     {
         printf("No book available\n");
         return;
     }    
+
     for(int i=0; i<bookCount; i++)
     {
-        printf("%d. %s\n", bookInfo[i].bookID, bookInfo[i].bookName);
+        displaySingle(arrBookInfo[i]);
     }
 }
+
+
+bool write(struct book arrBookInfo[], int bookCount)
+{
+    FILE *pFile = fopen("./data.txt", "w");
+
+    if (pFile == NULL) {
+        return false;
+    }
+
+    for (int i = 0; i < bookCount; i++)
+    {
+        // fwrite(&arrBookInfo[i], sizeof(struct book), 1, pFile);
+        fprintf(pFile, "book id: %d\n", arrBookInfo[i].bookID);
+        fprintf(pFile, "book name: %s\n", arrBookInfo[i].bookName);
+        fprintf(pFile, "publication date: %s\n", arrBookInfo[i].publicationDate);
+        fprintf(pFile, "publisher name: %s\n", arrBookInfo[i].publisherName);
+        fprintf(pFile, "author name: %s\n", arrBookInfo[i].authorName);
+        fprintf(pFile, "auther address: %s\n", arrBookInfo[i].authorAddress);
+        fprintf(pFile, "author phone number: %s\n", arrBookInfo[i].authorPhoneNum);
+        fprintf(pFile, "author email address: %s\n", arrBookInfo[i].authorEmailAddress);
+        fprintf(pFile, "author short Biography: %s\n", arrBookInfo[i].authorShortBio);
+        fputs("-----------------------------------------------------------------------\n", pFile);
+    }
+    fclose(pFile);
+    return true;
+}
+
