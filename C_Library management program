@@ -1,0 +1,178 @@
+// Write a menu driven Library Management program in C.
+
+// Book ID
+// Book Name
+// Publication Date
+// Publisher Name
+// Author Name
+// Author Address
+// Author Phone Number
+// Author Email Address
+// Author Short Biography
+ 
+ 
+// The program should support the following operations.
+ 
+// Add book information
+// Update book information
+// Delete book information
+// Search book information
+// Display a list of all books
+ 
+ 
+// Book ID should be unique
+// Use functions
+// Store all information in file(s)
+
+#include <string.h>
+#include <stdio.h>
+#include <stdbool.h>
+
+struct book
+{
+    int bookID;
+    char bookName[20];
+    char publicationDate[20];
+    char publisherName[20];
+    char authorName[20];
+    char authorAddress[20];
+    char authorPhoneNum[20];
+    char authorEmailAddress[20];
+    char authorShortBio[20];
+};
+
+// void add();
+// void update();
+// void delete();
+// void search();
+
+void add(struct book bookInfo[], int bookCount);
+
+bool search(struct book bookInfo[], int bookCount, int searchBookID);
+
+void display(struct book bookInfo[], int bookCount);
+void displaySingle(struct book bookInfo);
+
+int main(void)
+{
+    int i, j, n, d;
+    int cmd;
+    int bookCount = 0;
+    struct book bookInfo[10];
+    int searchBookID;
+    
+    while(true)
+    {
+        printf("Enter the number: \t");
+        scanf("%d", &cmd);
+        if(cmd == 0)
+        {
+            printf("Exit!\n");
+            break;
+        }
+        switch(cmd)
+        {
+            case 1: 
+                printf("Add book info\n");
+                add(bookInfo, bookCount);
+                bookCount++;
+                break;
+            case 2: 
+                printf("Update book info: \n");
+                // 어떤 책을 업데이트 할건지 일단 서치하고,
+                // 서치했을 때 책 목록에 있으면 -> 그때 업데이트 가능 
+                // 없으면 -> 없다고 한 줄 써줘야됨
+                break;
+            case 3: 
+                printf("Delete book info: \n");
+                // 북인포 어레이 순서가 하나씩 앞으로 당겨짐
+                bookCount--;
+                break;
+            case 4: 
+                printf("Search book info: \n");
+                printf("Enter book ID to search: \n");
+                scanf("%d", &searchBookID);
+                bool boolResult = search(bookInfo, bookCount, searchBookID);
+                if(boolResult == false)
+                    printf("Book ID not found\n");
+                break; 
+            case 5: 
+                printf("Display a list of all books: \n");
+                display(bookInfo, bookCount);
+                
+                break;
+            default:
+                printf("Invalid!\n");
+                break;
+        }
+    }
+    
+    return 0;
+}
+
+
+void add(struct book bookInfo[], int bookCount)
+{
+    if(bookCount == 10)
+    {
+        printf("No memories available\n");
+        return;
+    }
+    bookInfo[bookCount].bookID = bookCount+1;
+    printf("Enter book ID: \t");
+    scanf("%s", bookInfo[bookCount].bookID);
+    printf("Enter book name: \t");
+    scanf("%s", bookInfo[bookCount].bookName);
+    printf("Enter publication date: \t");
+    scanf("%s", bookInfo[bookCount].publicationDate);
+    printf("Enter publisher name: \t");
+    scanf("%s", bookInfo[bookCount].publisherName);
+    printf("Enter author name: \t");
+    scanf("%s", bookInfo[bookCount].authorName);
+    printf("Enter author address: \t");
+    scanf("%s", bookInfo[bookCount].authorAddress);
+    printf("Enter author phone number: \t");
+    scanf("%s", bookInfo[bookCount].authorPhoneNum);
+    printf("Enter author email address: \t");
+    scanf("%s", bookInfo[bookCount].authorEmailAddress);
+    printf("Enter author short biography: \t");
+    scanf("%s", bookInfo[bookCount].authorShortBio);
+
+    // 배열은 & 안 써도 됨 (배열 자체가 주소이기 때문)
+}
+
+
+bool search(struct book bookInfo[], int bookCount, int searchBookID)
+{
+    if(bookCount==0)
+        printf("No book to search\n");
+    for(int i=0; i<bookCount; i++)
+    {
+        if(bookInfo[i].bookID == searchBookID)
+        {
+            displaySingle(bookInfo[i]);
+            return true;
+        }
+    }
+    return false;
+}
+
+void displaySingle(struct book bookInfo)
+{
+    printf("%d. %s\n", bookInfo.bookID, bookInfo.bookName);
+}
+
+
+
+void display(struct book bookInfo[], int bookCount)
+{
+    if(bookCount == 0)
+    {
+        printf("No book available\n");
+        return;
+    }    
+    for(int i=0; i<bookCount; i++)
+    {
+        printf("%d. %s\n", bookInfo[i].bookID, bookInfo[i].bookName);
+    }
+}
